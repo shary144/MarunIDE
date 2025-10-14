@@ -23,8 +23,9 @@ int mortor(int rotatev/*-100%~100%*/,int id){
 
 	return 0;
 }
-int handle(int v,int arg/*直進が0,反時計回りに増える*/){
+int handle(int v,int argv/*直進が0,反時計回りに増える*/,int interval/*動く時間*/){
 	/*正射影ベクトルを取るとか*/
+//まずチャリンの位置が
 }
 int main(){
 	return 0;
