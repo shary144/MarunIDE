@@ -12,7 +12,7 @@
 #include <cstdio>
 #include <cstring>
 #include "frame.h"
-#include <cmath>
+#include <cmath> //
 double pi=3.141592;
 
 int center[2] = {2,0};
