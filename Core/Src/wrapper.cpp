@@ -13,7 +13,7 @@
 #include <cstring>
 #include "frame.h"
 #include <cmath> //
-double pi=3.141592;
+const double pi=3.141592;
 
 int center[2] = {2,0};
 //とりあえずモーターの回転とかは先に宣言して後からオーバーライド
