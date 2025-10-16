@@ -1,4 +1,4 @@
-#include <main.h>
+#include <main.h> // komennto
 extern"C"{
     void main_cpp(){
 
