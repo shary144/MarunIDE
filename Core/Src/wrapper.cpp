@@ -12,8 +12,8 @@
 #include <cstdio>
 #include <cstring>
 #include "frame.h"
-#include <cmath>
-double pi=3.141592;
+#include <cmath> //
+const double pi=3.141592;
 
 using namespace std;
 
@@ -87,7 +87,7 @@ extern "C" void main_cpp() {
 		} else {
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);   // 消灯
 		}
-
+        //僕が来ました
   	  }
 
     }
