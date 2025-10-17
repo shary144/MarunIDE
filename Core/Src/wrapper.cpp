@@ -4,7 +4,7 @@
  *  Created on: Aug 18, 2025
  *      Author: 12014
  */
-//some change
+//some change?
 #include "main.h"
 #include "tim.h"
 #include "usart.h"
@@ -14,6 +14,8 @@
 #include "frame.h"
 #include <cmath>
 double pi=3.141592;
+
+using namespace std;
 
 int center[2] = {2,0};
 //とりあえずモーターの回転とかは先に宣言して後からオーバーライド
@@ -35,20 +37,19 @@ int motor(int rotatev, int id){
 }
 
 struct UnderCarriage{
-	using namespace std;
 	int init_ang = 0;
 	int rcenter[2]={2,0};//{distance,arg}
 	void handle(int v,int angv/*直進が0,反時計回りに増える*/){
 		/*正射影ベクトルを取るとか*/
-		double x = v*cmath.cos(angv*pi/180);
-		double y = v*cmath.sin(angv*pi/180);
+		double x = v*cos(angv*pi/180);
+		double y = v*sin(angv*pi/180);
 		for(int id=0;id<3;id++){
-			int rotatev=-cmath.sin((init_ang+120*id)*pi/180)*x+cmath.cos((init_ang+120*id)*pi/180)*y;
+			int rotatev=-sin((init_ang+120*id)*pi/180)*x+cos((init_ang+120*id)*pi/180)*y;
 			motor(rotatev,id);
 		}
 	}
 	void rotate(int rotatev){
-		//ここは専ら向きのひずみの修正か射出のための機体転回か
+		//ここは専ら向きのひずみの修正か射出のための機体転回かあ
 		for(int id=0;id<3;id++){
 			motor(rotatev,id);
 		}
