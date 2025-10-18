@@ -12,7 +12,7 @@
 #include <cstdio>
 #include <cstring>
 #include "frame.h"
-#include <cmath> //
+#include <cmath> 
 const double pi=3.141592;
 
 using namespace std;
