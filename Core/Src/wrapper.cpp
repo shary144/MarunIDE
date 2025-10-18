@@ -53,7 +53,7 @@ struct UnderCarriage{
 	void rotate(int rotatev){
 		//ここは専ら向きのひずみの修正か射出のための機体転回かあ
 		for(int id=0;id<3;id++){
-			motor(rotatev,id);　//すべてのオムニホイールに同じ回転速度(rotatev）を送る
+			motor(rotatev,id); //すべてのオムニホイールに同じ回転速度(rotatev）を送る
 		}
 	}
 };
