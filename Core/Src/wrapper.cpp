@@ -19,6 +19,8 @@ using namespace std;
 
 int center[2] = {2,0};
 //とりあえずモーターの回転とかは先に宣言して後からオーバーライド
+
+//関数motorに、どのくらい回転させたいか（rotatev(-100から100まで))、どの車輪を動かしたいか(id(0,1,2で指定)入力
 int motor(int rotatev, int id){
     if (rotatev < -100 || rotatev > 100) return -1;
 
@@ -51,7 +53,7 @@ struct UnderCarriage{
 	void rotate(int rotatev){
 		//ここは専ら向きのひずみの修正か射出のための機体転回かあ
 		for(int id=0;id<3;id++){
-			motor(rotatev,id);
+			motor(rotatev,id); //すべてのオムニホイールに同じ回転速度(rotatev）を送る
 		}
 	}
 };
@@ -87,7 +89,6 @@ extern "C" void main_cpp() {
 		} else {
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);   // 消灯
 		}
-        //僕が来ました
   	  }
 
     }
