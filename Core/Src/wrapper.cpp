@@ -17,7 +17,7 @@ const double pi=3.141592;
 
 using namespace std;
 
-//ライントレーサの時と同じ仕組みだとしたらこれ
+//ライントレーサの時と同じ仕組みだとしたらこれ.
 //関数motorに、どのくらい回転させるか(speed(-100から100)で指定)、どの車輪を回転させるか(id(0,1,2で指定)送る)を指示する
 int moter(int speed,int id){
 	if(speed > 100) speed=100;
