@@ -5,6 +5,7 @@
  *      Author: 12014
  */
 //some change?
+//動きませんでした！！！！！！！(10/20)
 #include "main.h"
 #include "tim.h"
 #include "usart.h"
@@ -22,17 +23,42 @@ using namespace std;
 int moter(int speed,int id){
 	if(speed > 100) speed=100;
 	if(speed < -100) speed=-100;
-	int PWM = 1500 + (2.5*speed);
 	//iocファイルの"Core" > GPIO_OUTPUT : Configuration > PWM から使っているピンの一覧が見れます
-	if (id==0){
-		//ここはtim3のchannel1にPWMの制御を書き込むという意味;　他も同様に
-		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, PWM);
-	} else if (id==1){
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, PWM);
-	} else if (id==2){
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, PWM);
-	} else if (id==3){
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, PWM);
+	if (speed < 0) {
+		speed = -speed;
+		switch(id){
+		  case 0:
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, speed);
+			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_RESET);
+			  break;
+		  case 1:
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, speed);
+			  HAL_GPIO_WritePin(DC_DIR_2_GPIO_Port,DC_DIR_2_Pin,GPIO_PIN_RESET);
+			  break;
+		  case 2:
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, speed);
+			  HAL_GPIO_WritePin(DC_DIR_3_GPIO_Port,DC_DIR_3_Pin,GPIO_PIN_RESET);
+			  break;
+		  default:
+			  return -1;
+		}
+	} else {
+		switch(id){
+		  case 0:
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, speed);
+			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_SET);
+			  break;
+		  case 1:
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, speed);
+			  HAL_GPIO_WritePin(DC_DIR_2_GPIO_Port,DC_DIR_2_Pin,GPIO_PIN_SET);
+			  break;
+		  case 2:
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, speed);
+			  HAL_GPIO_WritePin(DC_DIR_3_GPIO_Port,DC_DIR_3_Pin,GPIO_PIN_SET);
+			  break;
+		  default:
+			  return -1;
+		}
 	}
 	return 0;
 }
