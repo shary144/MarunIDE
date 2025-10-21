@@ -13,23 +13,20 @@
 #include <cstdio>
 #include <cstring>
 #include "frame.h"
-<<<<<<< HEAD
 #include <cmath>
-=======
-#include <cmath> 
->>>>>>> f68427346082e7be5abf2b158198d02048f35791
 const double pi=3.141592;
 
 using namespace std;
 
-<<<<<<< HEAD
 //ライントレーサの時と同じ仕組みだとしたらこれ.
 //関数motorに、どのくらい回転させるか(speed(-100から100)で指定)、どの車輪を回転させるか(id(0,1,2で指定)送る)を指示する
 int moter(int speed,int id){
+	//check moter ignition point
 	if(speed > 100) speed=100;
 	if(speed < -100) speed=-100;
 	//iocファイルの"Core" > GPIO_OUTPUT : Configuration > PWM から使っているピンの一覧が見れます
 	if (speed < 0) {
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);//Aボタンと同じ
 		speed = -speed;
 		switch(id){
 		  case 0:
@@ -48,6 +45,7 @@ int moter(int speed,int id){
 			  return -1;
 		}
 	} else {
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_RESET);
 		switch(id){
 		  case 0:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, speed);
@@ -63,41 +61,8 @@ int moter(int speed,int id){
 			  break;
 		  default:
 			  return -1;
-=======
-int center[2] = {2,0};
-//とりあえずモーターの回転とかは先に宣言して後からオーバーライド
-
-//関数motorに、どのくらい回転させるか(rotatev(-100から100)で指定)、どの車輪を回転させるか(id(0,1,2で指定)送る)を指示する
-int motor(int rotatev, int id){
-    if (rotatev < -100 || rotatev > 100) return -1;
-
-    // PWM変換処理（仮）
-    int pwm = (rotatev + 100) * 10; // 0〜2000の範囲に変換など
-
-    // idに応じてTIMチャネルに出力（例）
-    switch(id){
-        case 0: __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm); break;
-        case 1: __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm); break;
-        case 2: __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm); break;
-        default: return -2;
-    }
-
-    return 0;
-}
-
-struct UnderCarriage{
-	int init_ang = 0;
-	int rcenter[2]={2,0};//{distance,arg}
-	void handle(int v,int angv/*直進が0,反時計回りに増える*/){
-		/*正射影ベクトルを取るとか*/
-		double x = v*cos(angv*pi/180);
-		double y = v*sin(angv*pi/180);
-		for(int id=0;id<3;id++){
-			int rotatev=-sin((init_ang+120*id)*pi/180)*x+cos((init_ang+120*id)*pi/180)*y;
-			motor(rotatev,id);
->>>>>>> f68427346082e7be5abf2b158198d02048f35791
 		}
-	}
+	};
 	return 0;
 }
 
@@ -158,16 +123,14 @@ class UnderCarriage{
 
    public:
 	void handleBody(double straightp,double rotatep, double outer_c){
+		// check handleBody ignition
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET); //Bボタンと同じ
 		init();
 		rotate(rotatep,outer_c);
 		advance(straightp);
 		for(int id=0;id<3;id++){
-<<<<<<< HEAD
 			moter(moter_speeds[id],id);
-=======
-			motor(rotatev,id); //すべてのオムニホイールに同じ回転速度(rotatev）を送る
->>>>>>> f68427346082e7be5abf2b158198d02048f35791
-		}
+		};
 	}
 };
 
@@ -175,7 +138,6 @@ extern "C" void main_cpp() {
 	uart_rx_start();
 
 	JoyFrame jf; //これはおそらく先輩が作った別ファイルの構造体
-	UnderCarriage uc; //こっちは自作
 
 
     while (1) {
@@ -190,8 +152,8 @@ extern "C" void main_cpp() {
   		int8_t hx = jf.hat_x, hy = jf.hat_y;
 
   		//すまん右手は使わせてもらう
-  		uc.handleBody(RX,RY,RT);
-
+  		//uc.handleBody(RX,RY,RT);
+  		/*
   		if (btn & (1 << 0)) {  // A
   		    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
   		    check_moter(0);
@@ -209,8 +171,20 @@ extern "C" void main_cpp() {
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET); // 点灯
 		} else {
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);   // 消灯
-		}
+		}*/
+  		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET);
+        //僕が来ました
+  		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
+  		/*
+  		if (RX>=0.2f){
+  		    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
+  		} else if (RX<=-0.2f){
+  			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET); // 消灯
+  		} else {
+  			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET); // 点灯
+  		}*/
   	  }
 
     }
 }
+
