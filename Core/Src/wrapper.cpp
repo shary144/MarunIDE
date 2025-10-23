@@ -23,7 +23,7 @@ const int speed_limit = 1000;
 
 
 //ライントレーサの時と同じ仕組みだとしたらこれ.
-//関数motorに、どのくらい回転させるか(speed(-100から100)で指定)、どの車輪を回転させるか(id(0,1,2で指定)送る)を指示する
+//関数motorに、どのくらい回転させるか(speed(-1から1のdouble)で指定)、どの車輪を回転させるか(id(0,1,2で指定)送る)を指示する
 int moter(double speed,int id){
 	//check moter ignition point
 	if(speed > 1) speed=1;
@@ -41,11 +41,11 @@ int moter(double speed,int id){
 			  break;
 		  case 1:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pos_speed*speed_limit);
-			  HAL_GPIO_WritePin(DC_DIR_2_GPIO_Port,DC_DIR_2_Pin,GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DC_DIR_2_GPIO_Port,DC_DIR_2_Pin,GPIO_PIN_SET);
 			  break;
 		  case 2:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, pos_speed*speed_limit);
-			  HAL_GPIO_WritePin(DC_DIR_3_GPIO_Port,DC_DIR_3_Pin,GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DC_DIR_3_GPIO_Port,DC_DIR_3_Pin,GPIO_PIN_SET);
 			  break;
 		  default:
 			  return -1;
@@ -59,11 +59,11 @@ int moter(double speed,int id){
 			  break;
 		  case 1:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, speed*speed_limit);
-			  HAL_GPIO_WritePin(DC_DIR_2_GPIO_Port,DC_DIR_2_Pin,GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DC_DIR_2_GPIO_Port,DC_DIR_2_Pin,GPIO_PIN_RESET);
 			  break;
 		  case 2:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, speed*speed_limit);
-			  HAL_GPIO_WritePin(DC_DIR_3_GPIO_Port,DC_DIR_3_Pin,GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DC_DIR_3_GPIO_Port,DC_DIR_3_Pin,GPIO_PIN_RESET);
 			  break;
 		  default:
 			  return -1;
