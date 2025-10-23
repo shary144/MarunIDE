@@ -27,25 +27,25 @@ int moter(int speed,int id){
 	//iocファイルの"Core" > GPIO_OUTPUT : Configuration > PWM から使っているピンの一覧が見れます
 	if (speed < 0) {
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);//Aボタンと同じ
-		speed = -speed;
+		int pos_speed = -speed;
 		switch(id){
 		  case 0:
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, speed);
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_speed);
 			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_RESET);
 			  break;
 		  case 1:
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, speed);
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pos_speed);
 			  HAL_GPIO_WritePin(DC_DIR_2_GPIO_Port,DC_DIR_2_Pin,GPIO_PIN_RESET);
 			  break;
 		  case 2:
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, speed);
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, pos_speed);
 			  HAL_GPIO_WritePin(DC_DIR_3_GPIO_Port,DC_DIR_3_Pin,GPIO_PIN_RESET);
 			  break;
 		  default:
 			  return -1;
 		}
 	} else {
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
 		switch(id){
 		  case 0:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, speed);
@@ -136,6 +136,9 @@ class UnderCarriage{
 
 extern "C" void main_cpp() {
 	uart_rx_start();
+	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
 
 	JoyFrame jf; //これはおそらく先輩が作った別ファイルの構造体
 
@@ -172,9 +175,10 @@ extern "C" void main_cpp() {
 		} else {
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);   // 消灯
 		}*/
-  		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET);
+  		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET);
+  		moter(50,0);
         //僕が来ました
-  		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
+  		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
   		/*
   		if (RX>=0.2f){
   		    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
