@@ -17,28 +17,34 @@
 const double pi=3.141592;
 
 using namespace std;
+//調整用
+const int speed_limit = 1000;
+//const int max_speed = 10000;
+
 
 //ライントレーサの時と同じ仕組みだとしたらこれ.
 //関数motorに、どのくらい回転させるか(speed(-100から100)で指定)、どの車輪を回転させるか(id(0,1,2で指定)送る)を指示する
-int moter(int speed,int id){
+int moter(double speed,int id){
 	//check moter ignition point
-	if(speed > 100) speed=100;
-	if(speed < -100) speed=-100;
+	if(speed > 1) speed=1;
+	if(speed < -1) speed=-1;
 	//iocファイルの"Core" > GPIO_OUTPUT : Configuration > PWM から使っているピンの一覧が見れます
 	if (speed < 0) {
 		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);//Aボタンと同じ
 		int pos_speed = -speed;
 		switch(id){
 		  case 0:
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_speed*100);
+			  //pwmの関数に入力できる値は0~10000で、
+			  //実際に使えるのは500までかな
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_speed*speed_limit/*~-500~500*/);
 			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_RESET);
 			  break;
 		  case 1:
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pos_speed*100);
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pos_speed*speed_limit);
 			  HAL_GPIO_WritePin(DC_DIR_2_GPIO_Port,DC_DIR_2_Pin,GPIO_PIN_RESET);
 			  break;
 		  case 2:
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, pos_speed*100);
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, pos_speed*speed_limit);
 			  HAL_GPIO_WritePin(DC_DIR_3_GPIO_Port,DC_DIR_3_Pin,GPIO_PIN_RESET);
 			  break;
 		  default:
@@ -48,15 +54,15 @@ int moter(int speed,int id){
 		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
 		switch(id){
 		  case 0:
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, speed*100);
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, speed*speed_limit);
 			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_SET);
 			  break;
 		  case 1:
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, speed*100);
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, speed*speed_limit);
 			  HAL_GPIO_WritePin(DC_DIR_2_GPIO_Port,DC_DIR_2_Pin,GPIO_PIN_SET);
 			  break;
 		  case 2:
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, speed*100);
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, speed*speed_limit);
 			  HAL_GPIO_WritePin(DC_DIR_3_GPIO_Port,DC_DIR_3_Pin,GPIO_PIN_SET);
 			  break;
 		  default:
@@ -69,7 +75,7 @@ int moter(int speed,int id){
 //どれがどこに対応してるかわからないので基盤読むか実際に動かすかして
 //idがどこに対応するかみてint moter(int id)内のidの振り分けを組み替えてね
 int check_moter(int id){
-	moter(100,id);
+	moter(1,id);
 	return 0;
 }
 
@@ -78,7 +84,7 @@ int check_moter(int id){
 class UnderCarriage{
    private:
 	//moter_speed[id]として各モーターの回転速度を格納する配列
-	int moter_speeds[3];
+	double moter_speeds[3];
 
 	//車輪の回転速度のデータを初期化
 	void init(){
@@ -101,8 +107,8 @@ class UnderCarriage{
 		for (int id=0;id<3;id++) {
 			//計算式はgDriveにあげてるから見て
 			//一応整数*小数は小数なので計算途中で切り捨て算は生じてないはず（と思いたい）
-			int regular_rotation = (2-5*outer_c*cos((60+120*id)*pi/180))/2/(1+outer_c);
-			moter_speeds[id] = (int)(100*regular_rotation*rotatep);
+			double regular_rotation = (2-5*outer_c*cos((60+120*id)*pi/180))/(2*(1+outer_c));
+			moter_speeds[id] = regular_rotation*rotatep;
 		}
 	}
 	//機体を前に進ませる
@@ -116,9 +122,9 @@ class UnderCarriage{
 		// 回転速度によっては安全マージンとして働くが今回はそうでないはずなので最低限度の速度は出せた方がいいかも)
 		// ここまでmoter_speeds[0]=moter_speeds[2]であり、moter_speedsで最も大きい値はmoter_speeds[1]だが
 		// moter1は直進運動では必ず0であるからして...説明が面倒になったのでgDriveの資料に気が向いたらあげておく
-		int max_speed = 100-abs(moter_speeds[0]);
-		moter_speeds[0]-=(int)(max_speed*vp);
-		moter_speeds[2]+=(int)(max_speed*vp);//あんま高尚なことできなかったや
+		double max_speed = 1-abs(moter_speeds[0]);
+		moter_speeds[0]-=max_speed*vp;
+		moter_speeds[2]+=max_speed*vp;//あんま高尚なことできなかったや
 	}
 
    public:
@@ -141,6 +147,7 @@ extern "C" void main_cpp() {
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
 
 	JoyFrame jf; //これはおそらく先輩が作った別ファイルの構造体
+	UnderCarriage uc;
 
 
     while (1) {
@@ -155,7 +162,7 @@ extern "C" void main_cpp() {
   		int8_t hx = jf.hat_x, hy = jf.hat_y;
 
   		//すまん右手は使わせてもらう
-  		//uc.handleBody(RX,RY,RT);
+  		uc.handleBody(-RY,RX,RT);
   		/*
   		if (btn & (1 << 0)) {  // A
   		    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
@@ -176,7 +183,6 @@ extern "C" void main_cpp() {
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);   // 消灯
 		}*/
   		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET);
-  		moter(5,0);
         //僕が来ました
   		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
 
