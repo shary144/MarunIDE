@@ -31,13 +31,13 @@ int moter(double speed,int id){
 	//iocファイルの"Core" > GPIO_OUTPUT : Configuration > PWM から使っているピンの一覧が見れます
 	if (speed < 0) {
 		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);//Aボタンと同じ
-		int pos_speed = -speed;
+		double pos_speed = -speed;
 		switch(id){
 		  case 0:
 			  //pwmの関数に入力できる値は0~10000で、
 			  //実際に使えるのは500までかな
-			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_speed*speed_limit/*~-500~500*/);
-			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_RESET);
+			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_speed*speed_limit/*0~1000*/);
+			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_RESET/*正転:逆転は配線がちゃんと作られていたらそろうはずらしい*/);
 			  break;
 		  case 1:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pos_speed*speed_limit);
@@ -162,7 +162,7 @@ extern "C" void main_cpp() {
   		int8_t hx = jf.hat_x, hy = jf.hat_y;
 
   		//すまん右手は使わせてもらう
-  		uc.handleBody(-RY,RX,RT);
+  		uc.handleBody(-RY,-RX,RT);
   		/*
   		if (btn & (1 << 0)) {  // A
   		    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
