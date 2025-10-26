@@ -193,15 +193,20 @@ extern "C" void main_cpp() {
   			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET); // 消灯
   		}
 
-  		// 以下、エアシリンダーを動かすコード　PB0を使います。
-  		if (btn & (1 << 0)) {  // Aボタンを押すことで、エアシリンダーが伸びる
+  		// 以下、エアシリンダーを動かすコード　PB0(ボールをつかむ)、PB1(射出）を使います。
+  		if (btn & (1 << 0)) {  // Aボタンを押すとボールをつかむ
   		 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
   		}
-  		if (btn & (1 << 1)) {  // Bボタンを押すことで、エアシリンダーが縮む
+  		if (btn & (1 << 1)) {  // Bボタンを押すとボールを離す
   			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
   		}
+  	    if (btn & (1 << 2)) {  // Xボタンを押すとボールを射出
+  			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
+  		}
+  	    if (btn & (1 << 3)) {  // Yボタンを押すと伸びたエアシリンダーが縮む
+  		    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
+  		}
   	  }
-
     }
 }
 
