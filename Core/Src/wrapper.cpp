@@ -186,10 +186,19 @@ extern "C" void main_cpp() {
         //僕が来ました
   		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
 
+
   		if (RX>=0.2f){
   		    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
   		} else if (RX<=-0.2f){
   			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET); // 消灯
+  		}
+
+  		// 以下、エアシリンダーを動かすコード　PB0を使います。
+  		if (btn & (1 << 0)) {  // Aボタンを押すことで、エアシリンダーが伸びる
+  		 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+  		}
+  		if (btn & (1 << 1)) {  // Bボタンを押すことで、エアシリンダーが縮む
+  			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
   		}
   	  }
 
