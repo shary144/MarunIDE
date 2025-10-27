@@ -72,6 +72,25 @@ int moter(double speed,int id){
 	return 0;
 }
 
+int stepping_moter(int sign){
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET); // (ENAピンON)
+	switch(sign){
+	  case 1:
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 500); // (これはステッピングの周波数をすでに調整)
+	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET); // (DIRピンを指定)正転
+	    break;
+	  case 0:
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 0); // (これはステッピングの周波数をすでに調整)
+		break;
+	  case -1:
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 500); // (これはステッピングの周波数をすでに調整)
+	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET); // (DIRピンを指定)逆転
+	    break;
+	  default:
+		return -1;
+	}
+	return 0;
+}
 //どれがどこに対応してるかわからないので基盤読むか実際に動かすかして
 //idがどこに対応するかみてint moter(int id)内のidの振り分けを組み替えてね
 int check_moter(int id){
@@ -145,6 +164,8 @@ extern "C" void main_cpp() {
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1); //ステッピングで使う分
+
 
 	JoyFrame jf; //これはおそらく先輩が作った別ファイルの構造体
 	UnderCarriage uc;
@@ -163,6 +184,8 @@ extern "C" void main_cpp() {
 
   		//すまん右手は使わせてもらう
   		uc.handleBody(-RY,-RX,RT);
+
+  	    stepping_moter(hy);
   		/*
   		if (btn & (1 << 0)) {  // A
   		    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
