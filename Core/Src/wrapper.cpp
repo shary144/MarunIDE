@@ -37,7 +37,7 @@ int moter(double speed,int id){
 			  //pwmの関数に入力できる値は0~10000で、
 			  //実際に使えるのは500までかな
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_speed*speed_limit/*0~1000*/);
-			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_RESET/*正転:逆転は配線がちゃんと作られていたらそろうはずらしい*/);
+			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_SET/*正転:逆転は配線がちゃんと作られていたらそろうはずらしい*/);
 			  break;
 		  case 1:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pos_speed*speed_limit);
@@ -55,7 +55,7 @@ int moter(double speed,int id){
 		switch(id){
 		  case 0:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, speed*speed_limit);
-			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DC_DIR_1_GPIO_Port,DC_DIR_1_Pin,GPIO_PIN_RESET);
 			  break;
 		  case 1:
 			  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, speed*speed_limit);
@@ -81,6 +81,7 @@ int stepping_moter(int sign){
 	    break;
 	  case 0:
 		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 0); // (これはステッピングの周波数をすでに調整)
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET); //　熱くならないようにDIRピンをLOWにする
 		break;
 	  case -1:
 		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 500); // (これはステッピングの周波数をすでに調整)
@@ -97,6 +98,24 @@ int check_moter(int id){
 	moter(1,id);
 	return 0;
 }
+struct Normalize{
+	double x;
+	double y;
+	Normalize(double _x,double _y):x(_x),y(_y){
+		if ((_x*_y)!=0){
+			double k = sqrt(x*x+y*y)/min(abs(x),abs(y));
+			x*=k;
+			y*=k;
+		}
+	};
+	double min(double a,double b){
+		if (a<b){
+			return a;
+		}else{
+			return b;
+		}
+	}
+};
 
 //足回りを制御する構造体
 //車輪の回転速度には限りがあるのでリソースの管理のために回転運動と並進運動を制御できるよう構造体として用意
@@ -187,7 +206,8 @@ extern "C" void main_cpp() {
   		int8_t hx = jf.hat_x, hy = jf.hat_y;
 
   		//すまん右手は使わせてもらう
-  		uc.handleBody(-RY,-RX,RT);
+  		Normalize norm(RX,RY);
+  		uc.handleBody(-norm.y,-norm.x,RT);
 
   	    stepping_moter(hy);
   	    /*
@@ -221,20 +241,17 @@ extern "C" void main_cpp() {
   			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET); // 消灯
   		}
 
-  		// 以下、エアシリンダーを動かすコード　PB0(ボールをつかむ)、PB1(射出）を使います。
+  		// 以下、エアシリンダーを動かすコード　PB1(ボールをつかむ)、PA4(射出）を使います。
   		if (btn & (1 << 0)) {  // Aボタンを押すとボールをつかむ
   		 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
-  		}
-  		if (btn & (1 << 1)) {  // Bボタンを押すとボールを離す
+  		} else { // Aボタンを離すとボールを離す
   			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
   		}
-  	    /*if (btn & (1 << 2)) {  // Xボタンを押すとボールを射出
-  			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
+  	    if (btn & (1 << 2)) {  // Xボタンを押すとボールを射出
+  			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+  		} else {
+  			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
   		}
-  	    if (btn & (1 << 3)) {  // Yボタンを押すと伸びたエアシリンダーが縮む
-  		    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
-  		}
-  		*/
   	  }
     }
 }
