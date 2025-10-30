@@ -159,6 +159,9 @@ class UnderCarriage{
 	}
 };
 
+JoyFrame jf_debug;
+volatile GPIO_TypeDef *volatile gpiob = GPIOB;
+
 extern "C" void main_cpp() {
 	uart_rx_start();
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
@@ -173,6 +176,7 @@ extern "C" void main_cpp() {
 
     while (1) {
   	  if (read_frame(&jf)) {
+  		jf_debug = jf;
   		float LX = q15_to_f(jf.lx_q15);   // -1から1
   		float LY = q15_to_f(jf.ly_q15);   // -1から1
   		float RX = q15_to_f(jf.rx_q15);   // -1から1
@@ -186,7 +190,7 @@ extern "C" void main_cpp() {
   		uc.handleBody(-RY,-RX,RT);
 
   	    stepping_moter(hy);
-  		/*
+  	    /*
   		if (btn & (1 << 0)) {  // A
   		    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
   		    check_moter(0);
@@ -204,10 +208,11 @@ extern "C" void main_cpp() {
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET); // 点灯
 		} else {
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);   // 消灯
-		}*/
+		}
   		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET);
         //僕が来ました
   		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
+  		 */
 
 
   		if (RX>=0.2f){
@@ -218,17 +223,18 @@ extern "C" void main_cpp() {
 
   		// 以下、エアシリンダーを動かすコード　PB0(ボールをつかむ)、PB1(射出）を使います。
   		if (btn & (1 << 0)) {  // Aボタンを押すとボールをつかむ
-  		 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+  		 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
   		}
   		if (btn & (1 << 1)) {  // Bボタンを押すとボールを離す
-  			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+  			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
   		}
-  	    if (btn & (1 << 2)) {  // Xボタンを押すとボールを射出
+  	    /*if (btn & (1 << 2)) {  // Xボタンを押すとボールを射出
   			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
   		}
   	    if (btn & (1 << 3)) {  // Yボタンを押すと伸びたエアシリンダーが縮む
   		    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
   		}
+  		*/
   	  }
     }
 }
