@@ -18,7 +18,7 @@ const double pi=3.141592;
 
 using namespace std;
 //調整用
-const int speed_limit = 1000;
+const int speed_limit = 3000;
 //const int max_speed = 10000;
 
 
@@ -76,15 +76,33 @@ int stepping_moter(int sign){
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET); // (ENAピンON)
 	switch(sign){
 	  case 1:
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 500); // (これはステッピングの周波数をすでに調整)
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 500); // (これはステッピングの周波数をすでに調整)
+	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET); // (DIRピンを指定)正転
+	    break;
+	  case 0:
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 0); // (これはステッピングの周波数をすでに調整)
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET); //　熱くならないようにDIRピンをLOWにする
+		break;
+	  case -1:
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 500); // (これはステッピングの周波数をすでに調整)
+	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET); // (DIRピンを指定)逆転
+	    break;
+	  default:
+		return -1;
+	}
+	return 0;
+}
+int updown(int sign){
+	switch(sign){
+	  case 1:
+		__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, speed_limit); // (これはステッピングの周波数をすでに調整)
 	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET); // (DIRピンを指定)正転
 	    break;
 	  case 0:
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 0); // (これはステッピングの周波数をすでに調整)
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET); //　熱くならないようにDIRピンをLOWにする
+		__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, 0); // (これはステッピングの周波数をすでに調整)
 		break;
 	  case -1:
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 500); // (これはステッピングの周波数をすでに調整)
+		__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, -speed_limit); // (これはステッピングの周波数をすでに調整)
 	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET); // (DIRピンを指定)逆転
 	    break;
 	  default:
@@ -186,7 +204,7 @@ extern "C" void main_cpp() {
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
-	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1); //ステッピングで使う分
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2); //昇降のDCモーターで使う分
 
 
 	JoyFrame jf; //これはおそらく先輩が作った別ファイルの構造体
@@ -209,7 +227,9 @@ extern "C" void main_cpp() {
   		Normalize norm(RX,RY);
   		uc.handleBody(-norm.y,-norm.x,RT);
 
-  	    stepping_moter(hy);
+  	    //stepping_moter(hy);
+
+  		updown(hy);
   	    /*
   		if (btn & (1 << 0)) {  // A
   		    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点灯
